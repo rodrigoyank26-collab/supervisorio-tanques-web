@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervisório — Tanques e Bombas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js"></script>
+<style>
+  :root {
+    --bg: #12181f;
+    --panel: #1b232c;
+    --panel-border: #2a3440;
+    --fluid: #22d3b4;
+    --fluid-dim: #1a5c50;
+    --on: #3fcb6e;
+    --off: #5b6b7a;
+    --amber: #f0a73b;
+    --text: #e8edf2;
+    --text-muted: #8b98a5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-top: 4px;
+  }
+
+  .conn-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 6px 12px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+  }
+
+  .conn-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--off);
+    transition: background 0.3s;
+  }
+
+  .conn-dot.online { background: var(--on); box-shadow: 0 0 8px var(--on); }
+  .conn-dot.error { background: var(--amber); }
+
+  section.group {
+    margin-bottom: 28px;
+  }
+
+  .group-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .tanks-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tank-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 20px;
+    flex: 1 1 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .tank-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    align-self: flex-start;
+  }
+
+  .tank-visual {
+    width: 110px;
+    height: 200px;
+    border: 2px solid var(--panel-border);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px, transparent 19px,
+        #263140 19px, #263140 20px
+      );
+  }
+
+  .tank-fluid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(180deg, var(--fluid) 0%, var(--fluid-dim) 100%);
+    transition: height 1.8s ease-in-out;
+  }
+
+  .tank-reading {
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+  }
+
+  .tank-reading .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .tank-reading .unit {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .tank-reading .capacity {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .pumps-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .pump-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 20px;
+    flex: 1 1 240px;
+  }
+
+  .pump-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .pump-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .pump-state {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: lowercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pump-state.on { background: rgba(63,203,110,0.15); color: var(--on); }
+  .pump-state.off { background: rgba(91,107,122,0.2); color: var(--off); }
+
+  .pump-state .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .pump-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn:hover { border-color: var(--text-muted); }
+  .btn:active { transform: translateY(1px); }
+
+  .btn.ligar:hover { background: rgba(63,203,110,0.1); border-color: var(--on); color: var(--on); }
+  .btn.desligar:hover { background: rgba(91,107,122,0.15); border-color: var(--text-muted); }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  footer {
+    margin-top: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  @media (max-width: 480px) {
+    .tank-visual { width: 90px; height: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Supervisório — Tanques e Bombas</h1>
+      <div class="subtitle">Monitoramento remoto via MQTT</div>
+    </div>
+    <div class="conn-status">
+      <span class="conn-dot" id="connDot"></span>
+      <span id="connLabel">conectando…</span>
+    </div>
+  </header>
+
+  <section class="group">
+    <div class="group-label">Tanques</div>
+    <div class="tanks-row">
+      <div class="tank-card">
+        <div class="tank-name">Tanque 1</div>
+        <div class="tank-visual"><div class="tank-fluid" id="fluid1"></div></div>
+        <div class="tank-reading">
+          <div><span class="value" id="valor1">—</span> <span class="unit">L</span></div>
+          <div class="capacity">de 15.000 L</div>
+        </div>
+      </div>
+      <div class="tank-card">
+        <div class="tank-name">Tanque 2</div>
+        <div class="tank-visual"><div class="tank-fluid" id="fluid2"></div></div>
+        <div class="tank-reading">
+          <div><span class="value" id="valor2">—</span> <span class="unit">L</span></div>
+          <div class="capacity">de 15.000 L</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="group-label">Bombas</div>
+    <div class="pumps-row">
+      <div class="pump-card">
+        <div class="pump-header">
+          <div class="pump-name">Bomba 1</div>
+          <div class="pump-state off" id="estadoBomba1"><span class="dot"></span><span id="estadoBomba1Texto">desligada</span></div>
+        </div>
+        <div class="pump-buttons">
+          <button class="btn ligar" onclick="enviarComando('bomba1','ligar')">Ligar</button>
+          <button class="btn desligar" onclick="enviarComando('bomba1','desligar')">Desligar</button>
+        </div>
+      </div>
+      <div class="pump-card">
+        <div class="pump-header">
+          <div class="pump-name">Bomba 2</div>
+          <div class="pump-state off" id="estadoBomba2"><span class="dot"></span><span id="estadoBomba2Texto">desligada</span></div>
+        </div>
+        <div class="pump-buttons">
+          <button class="btn ligar" onclick="enviarComando('bomba2','ligar')">Ligar</button>
+          <button class="btn desligar" onclick="enviarComando('bomba2','desligar')">Desligar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="rodape">aguardando primeira leitura…</footer>
+</div>
+
+<script>
+  // ---------- CONFIGURAÇÃO: preencha com os dados do seu cluster HiveMQ Cloud ----------
+  const HIVEMQ_HOST = "356a4d2db42347228ea9219b8e3dbea5.s1.eu.hivemq.cloud"; // sem "wss://" e sem porta
+  const HIVEMQ_PORT = 8884; // porta MQTT sobre WebSocket com TLS (confira no painel HiveMQ)
+  const HIVEMQ_USER = "Cristhianvogel";
+  const HIVEMQ_PASS = "Cristhianvogel1234";
+  // ----------------------------------------------------------------------------------
+
+  const CAPACIDADE = 15000;
+
+  const client = mqtt.connect(`wss://${HIVEMQ_HOST}:${HIVEMQ_PORT}/mqtt`, {
+    username: HIVEMQ_USER,
+    password: HIVEMQ_PASS,
+    clientId: 'supervisorio_web_' + Math.random().toString(16).slice(2, 10),
+    reconnectPeriod: 3000
+  });
+
+  const connDot = document.getElementById('connDot');
+  const connLabel = document.getElementById('connLabel');
+  const rodape = document.getElementById('rodape');
+
+  client.on('connect', () => {
+    connDot.className = 'conn-dot online';
+    connLabel.textContent = 'conectado';
+    ['tanque1/nivel', 'tanque2/nivel', 'bomba1/estado', 'bomba2/estado'].forEach(t => {
+      client.subscribe('supervisorio/' + t);
+    });
+  });
+
+  client.on('reconnect', () => {
+    connDot.className = 'conn-dot';
+    connLabel.textContent = 'reconectando…';
+  });
+
+  client.on('error', (err) => {
+    connDot.className = 'conn-dot error';
+    connLabel.textContent = 'erro de conexão';
+    console.error('MQTT error:', err);
+  });
+
+  client.on('message', (topic, message) => {
+    const payload = message.toString();
+    const partes = topic.split('/'); // supervisorio / <item> / <campo>
+    const item = partes[1];
+    const campo = partes[2];
+
+    if (campo === 'nivel') {
+      atualizarTanque(item === 'tanque1' ? 1 : 2, Number(payload));
+    } else if (campo === 'estado') {
+      atualizarBomba(item === 'bomba1' ? 1 : 2, payload);
+    }
+
+    rodape.textContent = 'última atualização: ' + new Date().toLocaleTimeString('pt-BR');
+  });
+
+  function atualizarTanque(numero, litros) {
+    const pct = Math.max(0, Math.min(100, (litros / CAPACIDADE) * 100));
+    document.getElementById('fluid' + numero).style.height = pct + '%';
+    document.getElementById('valor' + numero).textContent = litros.toLocaleString('pt-BR');
+  }
+
+  function atualizarBomba(numero, estado) {
+    const el = document.getElementById('estadoBomba' + numero);
+    const texto = document.getElementById('estadoBomba' + numero + 'Texto');
+    const ligada = estado === 'ligada';
+    el.className = 'pump-state ' + (ligada ? 'on' : 'off');
+    texto.textContent = estado;
+  }
+
+  function enviarComando(bomba, acao) {
+    client.publish('supervisorio/' + bomba + '/comando', acao);
+  }
+</script>
+
+</body>
+</html>
