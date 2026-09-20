@@ -209,6 +209,15 @@
     background: currentColor;
   }
 
+  .pump-flow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .pump-flow span { color: var(--text); }
+
   .pump-buttons {
     display: flex;
     gap: 10px;
@@ -291,21 +300,34 @@
       <div class="pump-card">
         <div class="pump-header">
           <div class="pump-name">Bomba 1</div>
-          <div class="pump-state off" id="estadoBomba1"><span class="dot"></span><span id="estadoBomba1Texto">desligada</span></div>
+          <div class="pump-state off" id="estadoBomba1"><span class="dot"></span><span id="estadoBomba1Texto">—</span></div>
         </div>
+        <div class="pump-flow">Vazão: <span id="vazaoBomba1">—</span> L/min</div>
         <div class="pump-buttons">
-          <button class="btn ligar" onclick="enviarComando('bomba1','ligar')">Ligar</button>
-          <button class="btn desligar" onclick="enviarComando('bomba1','desligar')">Desligar</button>
+          <button class="btn ligar" onclick="enviarComando('Bomba1','ligar')">Ligar</button>
+          <button class="btn desligar" onclick="enviarComando('Bomba1','desligar')">Desligar</button>
         </div>
       </div>
       <div class="pump-card">
         <div class="pump-header">
           <div class="pump-name">Bomba 2</div>
-          <div class="pump-state off" id="estadoBomba2"><span class="dot"></span><span id="estadoBomba2Texto">desligada</span></div>
+          <div class="pump-state off" id="estadoBomba2"><span class="dot"></span><span id="estadoBomba2Texto">—</span></div>
         </div>
+        <div class="pump-flow">Vazão: <span id="vazaoBomba2">—</span> L/min</div>
         <div class="pump-buttons">
-          <button class="btn ligar" onclick="enviarComando('bomba2','ligar')">Ligar</button>
-          <button class="btn desligar" onclick="enviarComando('bomba2','desligar')">Desligar</button>
+          <button class="btn ligar" onclick="enviarComando('Bomba2','ligar')">Ligar</button>
+          <button class="btn desligar" onclick="enviarComando('Bomba2','desligar')">Desligar</button>
+        </div>
+      </div>
+      <div class="pump-card">
+        <div class="pump-header">
+          <div class="pump-name">Bomba 3</div>
+          <div class="pump-state off" id="estadoBomba3"><span class="dot"></span><span id="estadoBomba3Texto">—</span></div>
+        </div>
+        <div class="pump-flow">Vazão: <span id="vazaoBomba3">—</span> L/min</div>
+        <div class="pump-buttons">
+          <button class="btn ligar" onclick="enviarComando('Bomba3','ligar')">Ligar</button>
+          <button class="btn desligar" onclick="enviarComando('Bomba3','desligar')">Desligar</button>
         </div>
       </div>
     </div>
@@ -335,12 +357,17 @@
   const connLabel = document.getElementById('connLabel');
   const rodape = document.getElementById('rodape');
 
+  // Tópicos que a página assina (formato: supervisorio/<nomeVariavel>)
+  const TOPICOS = [
+    'nivelTanque1', 'nivelTanque2',
+    'estadoBomba1', 'estadoBomba2', 'estadoBomba3',
+    'vazaoBomba1', 'vazaoBomba2', 'vazaoBomba3'
+  ];
+
   client.on('connect', () => {
     connDot.className = 'conn-dot online';
     connLabel.textContent = 'conectado';
-    ['tanque1/nivel', 'tanque2/nivel', 'bomba1/estado', 'bomba2/estado'].forEach(t => {
-      client.subscribe('supervisorio/' + t);
-    });
+    TOPICOS.forEach(t => client.subscribe('supervisorio/' + t));
   });
 
   client.on('reconnect', () => {
@@ -356,14 +383,16 @@
 
   client.on('message', (topic, message) => {
     const payload = message.toString();
-    const partes = topic.split('/'); // supervisorio / <item> / <campo>
-    const item = partes[1];
-    const campo = partes[2];
+    const variavel = topic.split('/')[1]; // supervisorio/<variavel>
 
-    if (campo === 'nivel') {
-      atualizarTanque(item === 'tanque1' ? 1 : 2, Number(payload));
-    } else if (campo === 'estado') {
-      atualizarBomba(item === 'bomba1' ? 1 : 2, payload);
+    if (variavel === 'nivelTanque1') atualizarTanque(1, Number(payload));
+    else if (variavel === 'nivelTanque2') atualizarTanque(2, Number(payload));
+    else if (variavel.startsWith('estadoBomba')) {
+      const numero = variavel.replace('estadoBomba', '');
+      atualizarEstadoBomba(numero, payload === 'true' || payload === true);
+    } else if (variavel.startsWith('vazaoBomba')) {
+      const numero = variavel.replace('vazaoBomba', '');
+      atualizarVazaoBomba(numero, Number(payload));
     }
 
     rodape.textContent = 'última atualização: ' + new Date().toLocaleTimeString('pt-BR');
@@ -375,16 +404,20 @@
     document.getElementById('valor' + numero).textContent = litros.toLocaleString('pt-BR');
   }
 
-  function atualizarBomba(numero, estado) {
+  function atualizarEstadoBomba(numero, ligada) {
     const el = document.getElementById('estadoBomba' + numero);
     const texto = document.getElementById('estadoBomba' + numero + 'Texto');
-    const ligada = estado === 'ligada';
     el.className = 'pump-state ' + (ligada ? 'on' : 'off');
-    texto.textContent = estado;
+    texto.textContent = ligada ? 'ligada' : 'desligada';
+  }
+
+  function atualizarVazaoBomba(numero, valor) {
+    document.getElementById('vazaoBomba' + numero).textContent = valor.toLocaleString('pt-BR');
   }
 
   function enviarComando(bomba, acao) {
-    client.publish('supervisorio/' + bomba + '/comando', acao);
+    // ex.: publica em supervisorio/comandoBomba1 com payload "ligar"/"desligar"
+    client.publish('supervisorio/comando' + bomba, acao);
   }
 </script>
 
