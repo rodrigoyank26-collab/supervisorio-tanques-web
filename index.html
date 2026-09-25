@@ -338,17 +338,13 @@
 
 <script>
   // ---------- CONFIGURAÇÃO: preencha com os dados do seu cluster HiveMQ Cloud ----------
-  const HIVEMQ_HOST = "356a4d2db42347228ea9219b8e3dbea5.s1.eu.hivemq.cloud"; // sem "wss://" e sem porta
-  const HIVEMQ_PORT = 8884; // porta MQTT sobre WebSocket com TLS (confira no painel HiveMQ)
-  const HIVEMQ_USER = "Cristhianvogel";
-  const HIVEMQ_PASS = "Cristhianvogel1234";
+  const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net"; // endereço público gerado pelo Tailscale Funnel
+  // Sem usuário/senha por enquanto (Mosquitto configurado sem autenticação)
   // ----------------------------------------------------------------------------------
 
   const CAPACIDADE = 15000;
 
-  const client = mqtt.connect(`wss://${HIVEMQ_HOST}:${HIVEMQ_PORT}/mqtt`, {
-    username: HIVEMQ_USER,
-    password: HIVEMQ_PASS,
+  const client = mqtt.connect(`wss://${MOSQUITTO_HOST}/`, {
     clientId: 'supervisorio_web_' + Math.random().toString(16).slice(2, 10),
     reconnectPeriod: 3000
   });
