@@ -123,12 +123,50 @@
     border-radius: 8px;
     position: relative;
     overflow: hidden;
-    background:
-      repeating-linear-gradient(
-        180deg,
-        transparent 0px, transparent 19px,
-        #263140 19px, #263140 20px
-      );
+    background: rgba(0,0,0,0.18);
+  }
+
+  /* marcas de nível (30%, 50%, 75%) dentro do tanque */
+  .tank-mark {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 1px dashed rgba(232,237,242,0.35);
+    z-index: 2;
+  }
+
+  /* tanque + escala lateral (o espaçador à esquerda mantém o tanque centralizado) */
+  .tank-wrap {
+    display: flex;
+    gap: 8px;
+  }
+  .tank-wrap::before {
+    content: '';
+    width: 38px;
+    flex: none;
+  }
+  .tank-scale {
+    position: relative;
+    width: 38px;
+    flex: none;
+  }
+  /* top/bottom de 2px = espessura da borda, para a % bater com o nível interno */
+  .tank-scale-inner {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+  }
+  .tank-scale span {
+    position: absolute;
+    left: 0;
+    transform: translateY(50%);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    line-height: 1;
   }
 
   .tank-fluid {
@@ -136,7 +174,7 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 50%;
+    height: 0%;
     background: linear-gradient(180deg, var(--fluid) 0%, var(--fluid-dim) 100%);
     transition: height 1.8s ease-in-out;
   }
@@ -218,6 +256,28 @@
 
   .pump-flow span { color: var(--text); }
 
+  .tank-flow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  .tank-flow span { color: var(--text); }
+
+  .pump-mode {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .pump-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+    min-height: 1em;
+  }
+
   .pump-buttons {
     display: flex;
     gap: 10px;
@@ -245,6 +305,117 @@
 
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+
+  [hidden] { display: none !important; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .user-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .btn-sair {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: transparent;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  .btn-sair:hover { border-color: var(--text-muted); }
+
+  /* seletor Manual / Automático */
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .seg-btn {
+    padding: 4px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .seg-btn + .seg-btn { border-left: 1px solid var(--panel-border); }
+  .seg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .seg-btn.ativo.manual { background: rgba(34,211,180,0.15); color: var(--fluid); }
+  .seg-btn.ativo.auto { background: rgba(240,167,59,0.15); color: var(--amber); }
+
+  /* tela de login */
+  .login {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 10;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 340px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 28px 24px;
+  }
+  .login-card h2 { font-size: 1.2rem; font-weight: 600; }
+  .login-card .subtitle { margin-bottom: 22px; }
+  .login-card label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .login-card input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border-radius: 6px;
+    border: 1px solid var(--panel-border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem;
+  }
+  .login-card input:focus { outline: none; border-color: var(--fluid); }
+  .login-erro {
+    min-height: 1.2em;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    color: var(--amber);
+  }
+  .btn-login {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--fluid);
+    background: rgba(34,211,180,0.12);
+    color: var(--fluid);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-login:hover { background: rgba(34,211,180,0.2); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+
   footer {
     margin-top: 32px;
     font-family: 'IBM Plex Mono', monospace;
@@ -260,15 +431,34 @@
 </head>
 <body>
 
-<div class="wrap">
+<div class="login" id="login">
+  <div class="login-card">
+    <h2>Supervisório</h2>
+    <div class="subtitle">Tanques e Bombas — acesso restrito</div>
+    <form id="formLogin">
+      <label for="usuario">Usuário</label>
+      <input id="usuario" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password">
+      <div class="login-erro" id="loginErro"></div>
+      <button class="btn-login" id="btnEntrar" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
   <header>
     <div>
       <h1>Supervisório — Tanques e Bombas</h1>
       <div class="subtitle">Monitoramento remoto via MQTT</div>
     </div>
-    <div class="conn-status">
-      <span class="conn-dot" id="connDot"></span>
-      <span id="connLabel">conectando…</span>
+    <div class="header-right">
+      <div class="conn-status">
+        <span class="conn-dot" id="connDot"></span>
+        <span id="connLabel">conectando…</span>
+      </div>
+      <span class="user-label" id="usuarioLogado"></span>
+      <button class="btn-sair" type="button" onclick="sair()">Sair</button>
     </div>
   </header>
 
@@ -277,18 +467,50 @@
     <div class="tanks-row">
       <div class="tank-card">
         <div class="tank-name">Tanque 1</div>
-        <div class="tank-visual"><div class="tank-fluid" id="fluid1"></div></div>
+        <div class="tank-wrap">
+          <div class="tank-visual">
+            <div class="tank-fluid" id="fluid1"></div>
+            <div class="tank-mark" style="bottom:30%"></div>
+            <div class="tank-mark" style="bottom:50%"></div>
+            <div class="tank-mark" style="bottom:75%"></div>
+          </div>
+          <div class="tank-scale">
+            <div class="tank-scale-inner">
+              <span style="bottom:100%">100%</span>
+              <span style="bottom:75%">75%</span>
+              <span style="bottom:50%">50%</span>
+              <span style="bottom:30%">30%</span>
+            </div>
+          </div>
+        </div>
         <div class="tank-reading">
           <div><span class="value" id="valor1">—</span> <span class="unit">L</span></div>
           <div class="capacity">de 15.000 L</div>
+          <div class="tank-flow">Vazão: <span id="vazaoTanque1">—</span> L/min</div>
         </div>
       </div>
       <div class="tank-card">
         <div class="tank-name">Tanque 2</div>
-        <div class="tank-visual"><div class="tank-fluid" id="fluid2"></div></div>
+        <div class="tank-wrap">
+          <div class="tank-visual">
+            <div class="tank-fluid" id="fluid2"></div>
+            <div class="tank-mark" style="bottom:30%"></div>
+            <div class="tank-mark" style="bottom:50%"></div>
+            <div class="tank-mark" style="bottom:75%"></div>
+          </div>
+          <div class="tank-scale">
+            <div class="tank-scale-inner">
+              <span style="bottom:100%">100%</span>
+              <span style="bottom:75%">75%</span>
+              <span style="bottom:50%">50%</span>
+              <span style="bottom:30%">30%</span>
+            </div>
+          </div>
+        </div>
         <div class="tank-reading">
           <div><span class="value" id="valor2">—</span> <span class="unit">L</span></div>
           <div class="capacity">de 15.000 L</div>
+          <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> L/min</div>
         </div>
       </div>
     </div>
@@ -303,10 +525,17 @@
           <div class="pump-state off" id="estadoBomba1"><span class="dot"></span><span id="estadoBomba1Texto">—</span></div>
         </div>
         <div class="pump-flow">Vazão: <span id="vazaoBomba1">—</span> L/min</div>
-        <div class="pump-buttons">
-          <button class="btn ligar" onclick="enviarComando('Bomba1','ligar')">Ligar</button>
-          <button class="btn desligar" onclick="enviarComando('Bomba1','desligar')">Desligar</button>
+        <div class="pump-mode">Modo:
+          <span class="seg">
+            <button class="seg-btn manual" id="btnManual1" type="button" disabled onclick="pedirModo('Bomba1','manual')">Manual</button>
+            <button class="seg-btn auto" id="btnAuto1" type="button" disabled onclick="pedirModo('Bomba1','automatico')">Automático</button>
+          </span>
         </div>
+        <div class="pump-buttons">
+          <button class="btn ligar" id="btnLigar1" disabled onclick="enviarComando('Bomba1','ligar')">Ligar</button>
+          <button class="btn desligar" id="btnDesligar1" disabled onclick="enviarComando('Bomba1','desligar')">Desligar</button>
+        </div>
+        <div class="pump-hint" id="dicaBomba1">Aguardando o modo da bomba…</div>
       </div>
       <div class="pump-card">
         <div class="pump-header">
@@ -314,10 +543,17 @@
           <div class="pump-state off" id="estadoBomba2"><span class="dot"></span><span id="estadoBomba2Texto">—</span></div>
         </div>
         <div class="pump-flow">Vazão: <span id="vazaoBomba2">—</span> L/min</div>
-        <div class="pump-buttons">
-          <button class="btn ligar" onclick="enviarComando('Bomba2','ligar')">Ligar</button>
-          <button class="btn desligar" onclick="enviarComando('Bomba2','desligar')">Desligar</button>
+        <div class="pump-mode">Modo:
+          <span class="seg">
+            <button class="seg-btn manual" id="btnManual2" type="button" disabled onclick="pedirModo('Bomba2','manual')">Manual</button>
+            <button class="seg-btn auto" id="btnAuto2" type="button" disabled onclick="pedirModo('Bomba2','automatico')">Automático</button>
+          </span>
         </div>
+        <div class="pump-buttons">
+          <button class="btn ligar" id="btnLigar2" disabled onclick="enviarComando('Bomba2','ligar')">Ligar</button>
+          <button class="btn desligar" id="btnDesligar2" disabled onclick="enviarComando('Bomba2','desligar')">Desligar</button>
+        </div>
+        <div class="pump-hint" id="dicaBomba2">Aguardando o modo da bomba…</div>
       </div>
       <div class="pump-card">
         <div class="pump-header">
@@ -325,10 +561,17 @@
           <div class="pump-state off" id="estadoBomba3"><span class="dot"></span><span id="estadoBomba3Texto">—</span></div>
         </div>
         <div class="pump-flow">Vazão: <span id="vazaoBomba3">—</span> L/min</div>
-        <div class="pump-buttons">
-          <button class="btn ligar" onclick="enviarComando('Bomba3','ligar')">Ligar</button>
-          <button class="btn desligar" onclick="enviarComando('Bomba3','desligar')">Desligar</button>
+        <div class="pump-mode">Modo:
+          <span class="seg">
+            <button class="seg-btn manual" id="btnManual3" type="button" disabled onclick="pedirModo('Bomba3','manual')">Manual</button>
+            <button class="seg-btn auto" id="btnAuto3" type="button" disabled onclick="pedirModo('Bomba3','automatico')">Automático</button>
+          </span>
         </div>
+        <div class="pump-buttons">
+          <button class="btn ligar" id="btnLigar3" disabled onclick="enviarComando('Bomba3','ligar')">Ligar</button>
+          <button class="btn desligar" id="btnDesligar3" disabled onclick="enviarComando('Bomba3','desligar')">Desligar</button>
+        </div>
+        <div class="pump-hint" id="dicaBomba3">Aguardando o modo da bomba…</div>
       </div>
     </div>
   </section>
@@ -337,47 +580,141 @@
 </div>
 
 <script>
-  // ---------- CONFIGURAÇÃO: preencha com os dados do seu cluster HiveMQ Cloud ----------
-  const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net"; // endereço público gerado pelo Tailscale Funnel
-  // Sem usuário/senha por enquanto (Mosquitto configurado sem autenticação)
-  // ----------------------------------------------------------------------------------
+  
+  const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net";
 
   const CAPACIDADE = 15000;
-
-  const client = mqtt.connect(`wss://${MOSQUITTO_HOST}/`, {
-    clientId: 'supervisorio_web_' + Math.random().toString(16).slice(2, 10),
-    reconnectPeriod: 3000
-  });
-
-  const connDot = document.getElementById('connDot');
-  const connLabel = document.getElementById('connLabel');
-  const rodape = document.getElementById('rodape');
 
   // Tópicos que a página assina (formato: supervisorio/<nomeVariavel>)
   const TOPICOS = [
     'nivelTanque1', 'nivelTanque2',
     'estadoBomba1', 'estadoBomba2', 'estadoBomba3',
-    'vazaoBomba1', 'vazaoBomba2', 'vazaoBomba3'
+    'vazaoBomba1', 'vazaoBomba2', 'vazaoBomba3',
+    'autoBomba1', 'autoBomba2', 'autoBomba3',
+    'vazaoTanque1', 'vazaoTanque2'
   ];
 
-  client.on('connect', () => {
-    connDot.className = 'conn-dot online';
-    connLabel.textContent = 'conectado';
-    TOPICOS.forEach(t => client.subscribe('supervisorio/' + t));
+  const elLogin = document.getElementById('login');
+  const elApp = document.getElementById('app');
+  const elErro = document.getElementById('loginErro');
+  const btnEntrar = document.getElementById('btnEntrar');
+  const connDot = document.getElementById('connDot');
+  const connLabel = document.getElementById('connLabel');
+  const rodape = document.getElementById('rodape');
+
+  let client = null;
+  let timerLogin = null;
+  // true = automático, false = manual, undefined = ainda não recebido do CLP
+  const modoBomba = {};
+
+  document.getElementById('formLogin').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value.trim();
+    const senha = document.getElementById('senha').value;
+    if (!usuario || !senha) {
+      elErro.textContent = 'Informe usuário e senha.';
+      return;
+    }
+    conectar(usuario, senha);
   });
 
-  client.on('reconnect', () => {
-    connDot.className = 'conn-dot';
-    connLabel.textContent = 'reconectando…';
-  });
+  function liberarBotaoEntrar() {
+    btnEntrar.disabled = false;
+    btnEntrar.textContent = 'Entrar';
+  }
 
-  client.on('error', (err) => {
-    connDot.className = 'conn-dot error';
-    connLabel.textContent = 'erro de conexão';
-    console.error('MQTT error:', err);
-  });
+  function voltarAoLogin(mensagem) {
+    clearTimeout(timerLogin);
+    if (client) client.end(true);
+    client = null;
+    elApp.hidden = true;
+    elLogin.hidden = false;
+    elErro.textContent = mensagem;
+    liberarBotaoEntrar();
+  }
 
-  client.on('message', (topic, message) => {
+  function recusadoPeloBroker(err) {
+    const msg = (err && err.message) || '';
+    return /not authorized|bad user|identifier rejected/i.test(msg) ||
+           [4, 5, 134, 135].includes(err && err.code);
+  }
+
+  function conectar(usuario, senha) {
+    elErro.textContent = '';
+    btnEntrar.disabled = true;
+    btnEntrar.textContent = 'Entrando…';
+
+    let autenticado = false;
+
+    if (typeof mqtt === 'undefined') {
+      voltarAoLogin('A biblioteca de comunicação não carregou. Verifique a internet e recarregue a página.');
+      return;
+    }
+
+    try {
+      client = mqtt.connect(`wss://${MOSQUITTO_HOST}/`, {
+        username: usuario,
+        password: senha,
+        clientId: 'supervisorio_web_' + Math.random().toString(16).slice(2, 10),
+        reconnectPeriod: 3000,
+        connectTimeout: 8000
+      });
+    } catch (e) {
+      console.error(e);
+      voltarAoLogin('Não foi possível iniciar a conexão.');
+      return;
+    }
+
+    // se o servidor não responder, avisa em vez de ficar parado em "Entrando…"
+    timerLogin = setTimeout(() => {
+      if (!autenticado) {
+        voltarAoLogin('Sem resposta do servidor. Verifique se ele está ligado e conectado à internet e tente de novo.');
+      }
+    }, 8000);
+
+    client.on('connect', () => {
+      autenticado = true;
+      clearTimeout(timerLogin);
+      elLogin.hidden = true;
+      elApp.hidden = false;
+      document.getElementById('usuarioLogado').textContent = usuario;
+      document.getElementById('senha').value = '';
+      connDot.className = 'conn-dot online';
+      connLabel.textContent = 'conectado';
+      TOPICOS.forEach(t => client.subscribe('supervisorio/' + t));
+    });
+
+    client.on('reconnect', () => {
+      if (!autenticado) return;
+      connDot.className = 'conn-dot';
+      connLabel.textContent = 'reconectando…';
+    });
+
+    client.on('error', (err) => {
+      console.error('MQTT error:', err);
+      if (recusadoPeloBroker(err)) {
+        voltarAoLogin(autenticado
+          ? 'Acesso recusado pelo servidor. Entre novamente.'
+          : 'Usuário ou senha incorretos.');
+        return;
+      }
+      if (!autenticado) {
+        voltarAoLogin('Não foi possível conectar ao servidor. Tente novamente.');
+        return;
+      }
+      connDot.className = 'conn-dot error';
+      connLabel.textContent = 'erro de conexão';
+    });
+
+    client.on('message', tratarMensagem);
+  }
+
+  function sair() {
+    if (client) client.end(true);
+    location.reload(); // limpa a tela e as credenciais da memória
+  }
+
+  function tratarMensagem(topic, message) {
     const payload = message.toString();
     const variavel = topic.split('/')[1]; // supervisorio/<variavel>
 
@@ -385,14 +722,19 @@
     else if (variavel === 'nivelTanque2') atualizarTanque(2, Number(payload));
     else if (variavel.startsWith('estadoBomba')) {
       const numero = variavel.replace('estadoBomba', '');
-      atualizarEstadoBomba(numero, payload === 'true' || payload === true);
+      atualizarEstadoBomba(numero, payload === 'true');
     } else if (variavel.startsWith('vazaoBomba')) {
       const numero = variavel.replace('vazaoBomba', '');
       atualizarVazaoBomba(numero, Number(payload));
+    } else if (variavel.startsWith('autoBomba')) {
+      const numero = variavel.replace('autoBomba', '');
+      atualizarModoBomba(numero, payload === 'true');
+    } else if (variavel === 'vazaoTanque1' || variavel === 'vazaoTanque2') {
+      document.getElementById(variavel).textContent = Number(payload).toLocaleString('pt-BR');
     }
 
     rodape.textContent = 'última atualização: ' + new Date().toLocaleTimeString('pt-BR');
-  });
+  }
 
   function atualizarTanque(numero, litros) {
     const pct = Math.max(0, Math.min(100, (litros / CAPACIDADE) * 100));
@@ -411,8 +753,34 @@
     document.getElementById('vazaoBomba' + numero).textContent = valor.toLocaleString('pt-BR');
   }
 
+  function atualizarModoBomba(numero, auto) {
+    modoBomba[numero] = auto;
+    const btnManual = document.getElementById('btnManual' + numero);
+    const btnAuto = document.getElementById('btnAuto' + numero);
+    btnManual.disabled = false;
+    btnAuto.disabled = false;
+    btnManual.classList.toggle('ativo', !auto);
+    btnAuto.classList.toggle('ativo', auto);
+    document.getElementById('btnLigar' + numero).disabled = auto;
+    document.getElementById('btnDesligar' + numero).disabled = auto;
+    document.getElementById('dicaBomba' + numero).textContent =
+      auto ? 'Em automático: comandos pelo sistema bloqueados.' : '';
+  }
+
+  function pedirModo(bomba, modo) {
+    const numero = bomba.replace('Bomba', '');
+    if (modoBomba[numero] === undefined) return; // modo atual ainda desconhecido
+    if ((modo === 'automatico') === modoBomba[numero]) return; // já está nesse modo
+    if (modo === 'manual' &&
+        !confirm('Colocar a Bomba ' + numero + ' em MANUAL?\nIsso permite ligar e desligar a bomba pelo sistema.')) {
+      return;
+    }
+    client.publish('supervisorio/modo' + bomba, modo);
+  }
+
   function enviarComando(bomba, acao) {
-    // ex.: publica em supervisorio/comandoBomba1 com payload "ligar"/"desligar"
+    const numero = bomba.replace('Bomba', '');
+    if (modoBomba[numero] !== false) return;
     client.publish('supervisorio/comando' + bomba, acao);
   }
 </script>
