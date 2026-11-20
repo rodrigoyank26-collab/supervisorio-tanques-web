@@ -484,7 +484,7 @@
           </div>
         </div>
         <div class="tank-reading">
-          <div><span class="value" id="valor1">—</span> <span class="unit">m³</span></div>
+          <div><span class="value" id="valor1">—</span> <span class="unit">%</span></div>
           <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque1">—</span> m³/min</div>
         </div>
@@ -508,7 +508,7 @@
           </div>
         </div>
         <div class="tank-reading">
-          <div><span class="value" id="valor2">—</span> <span class="unit">m³</span></div>
+          <div><span class="value" id="valor2">—</span> <span class="unit">%</span></div>
           <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> m³/min</div>
         </div>
@@ -742,9 +742,8 @@
 
   function atualizarTanque(numero, nivelPct) {
     const pct = Math.max(0, Math.min(100, nivelPct));
-    const m3 = (pct / 100) * CAPACIDADE_M3;
     document.getElementById('fluid' + numero).style.height = pct + '%';
-    document.getElementById('valor' + numero).textContent = fmt(m3);
+    document.getElementById('valor' + numero).textContent = fmt(pct);
   }
 
   function atualizarEstadoBomba(numero, ligada) {
