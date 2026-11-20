@@ -485,7 +485,6 @@
         </div>
         <div class="tank-reading">
           <div><span class="value" id="valor1">—</span> <span class="unit">%</span></div>
-          <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque1">—</span> m³/min</div>
         </div>
       </div>
@@ -509,8 +508,30 @@
         </div>
         <div class="tank-reading">
           <div><span class="value" id="valor2">—</span> <span class="unit">%</span></div>
-          <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> m³/min</div>
+        </div>
+      </div>
+      <div class="tank-card">
+        <div class="tank-name">Tanque 3</div>
+        <div class="tank-wrap">
+          <div class="tank-visual">
+            <div class="tank-fluid" id="fluid3"></div>
+            <div class="tank-mark" style="bottom:30%"></div>
+            <div class="tank-mark" style="bottom:50%"></div>
+            <div class="tank-mark" style="bottom:75%"></div>
+          </div>
+          <div class="tank-scale">
+            <div class="tank-scale-inner">
+              <span style="bottom:100%">100%</span>
+              <span style="bottom:75%">75%</span>
+              <span style="bottom:50%">50%</span>
+              <span style="bottom:30%">30%</span>
+            </div>
+          </div>
+        </div>
+        <div class="tank-reading">
+          <div><span class="value" id="valor3">—</span> <span class="unit">%</span></div>
+          <div class="tank-flow">Vazão: <span id="vazaoTanque3">—</span> m³/min</div>
         </div>
       </div>
     </div>
@@ -583,7 +604,6 @@
   
   const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net";
 
-  const CAPACIDADE_M3 = 15;
 
   function fmt(valor) {
     return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -591,11 +611,11 @@
 
   // Tópicos que a página assina (formato: supervisorio/<nomeVariavel>)
   const TOPICOS = [
-    'nivelTanque1', 'nivelTanque2',
+    'nivelTanque1', 'nivelTanque2', 'nivelTanque3',
     'estadoBomba1', 'estadoBomba2', 'estadoBomba3',
     'vazaoBomba1', 'vazaoBomba2', 'vazaoBomba3',
     'autoBomba1', 'autoBomba2', 'autoBomba3',
-    'vazaoTanque1', 'vazaoTanque2'
+    'vazaoTanque1', 'vazaoTanque2', 'vazaoTanque3'
   ];
 
   const elLogin = document.getElementById('login');
@@ -724,6 +744,7 @@
 
     if (variavel === 'nivelTanque1') atualizarTanque(1, Number(payload));
     else if (variavel === 'nivelTanque2') atualizarTanque(2, Number(payload));
+    else if (variavel === 'nivelTanque3') atualizarTanque(3, Number(payload));
     else if (variavel.startsWith('estadoBomba')) {
       const numero = variavel.replace('estadoBomba', '');
       atualizarEstadoBomba(numero, payload === 'true');
@@ -733,7 +754,7 @@
     } else if (variavel.startsWith('autoBomba')) {
       const numero = variavel.replace('autoBomba', '');
       atualizarModoBomba(numero, payload === 'true');
-    } else if (variavel === 'vazaoTanque1' || variavel === 'vazaoTanque2') {
+    } else if (variavel === 'vazaoTanque1' || variavel === 'vazaoTanque2' || variavel === 'vazaoTanque3') {
       document.getElementById(variavel).textContent = fmt(Number(payload));
     }
 
