@@ -510,7 +510,7 @@
         <div class="tank-reading">
           <div><span class="value" id="valor2">—</span> <span class="unit">L</span></div>
           <div class="capacity">de 15.000 L</div>
-          <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> m³/min</div>
+          <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> L/min</div>
         </div>
       </div>
     </div>
@@ -584,6 +584,10 @@
   const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net";
 
   const CAPACIDADE = 15000;
+
+  function fmt(valor) {
+    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
 
   // Tópicos que a página assina (formato: supervisorio/<nomeVariavel>)
   const TOPICOS = [
@@ -730,7 +734,7 @@
       const numero = variavel.replace('autoBomba', '');
       atualizarModoBomba(numero, payload === 'true');
     } else if (variavel === 'vazaoTanque1' || variavel === 'vazaoTanque2') {
-      document.getElementById(variavel).textContent = Number(payload).toLocaleString('pt-BR');
+      document.getElementById(variavel).textContent = fmt(Number(payload));
     }
 
     rodape.textContent = 'última atualização: ' + new Date().toLocaleTimeString('pt-BR');
@@ -739,7 +743,7 @@
   function atualizarTanque(numero, litros) {
     const pct = Math.max(0, Math.min(100, (litros / CAPACIDADE) * 100));
     document.getElementById('fluid' + numero).style.height = pct + '%';
-    document.getElementById('valor' + numero).textContent = litros.toLocaleString('pt-BR');
+    document.getElementById('valor' + numero).textContent = fmt(litros);
   }
 
   function atualizarEstadoBomba(numero, ligada) {
@@ -750,7 +754,7 @@
   }
 
   function atualizarVazaoBomba(numero, valor) {
-    document.getElementById('vazaoBomba' + numero).textContent = valor.toLocaleString('pt-BR');
+    document.getElementById('vazaoBomba' + numero).textContent = fmt(valor);
   }
 
   function atualizarModoBomba(numero, auto) {
