@@ -484,8 +484,8 @@
           </div>
         </div>
         <div class="tank-reading">
-          <div><span class="value" id="valor1">—</span> <span class="unit">L</span></div>
-          <div class="capacity">de 15.000 L</div>
+          <div><span class="value" id="valor1">—</span> <span class="unit">m³</span></div>
+          <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque1">—</span> m³/min</div>
         </div>
       </div>
@@ -508,8 +508,8 @@
           </div>
         </div>
         <div class="tank-reading">
-          <div><span class="value" id="valor2">—</span> <span class="unit">L</span></div>
-          <div class="capacity">de 15.000 L</div>
+          <div><span class="value" id="valor2">—</span> <span class="unit">m³</span></div>
+          <div class="capacity">de 15 m³</div>
           <div class="tank-flow">Vazão: <span id="vazaoTanque2">—</span> m³/min</div>
         </div>
       </div>
@@ -583,7 +583,7 @@
   
   const MOSQUITTO_HOST = "win-scfl7us8a0f.tail99b4e8.ts.net";
 
-  const CAPACIDADE = 15000;
+  const CAPACIDADE_M3 = 15;
 
   function fmt(valor) {
     return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -740,10 +740,11 @@
     rodape.textContent = 'última atualização: ' + new Date().toLocaleTimeString('pt-BR');
   }
 
-  function atualizarTanque(numero, litros) {
-    const pct = Math.max(0, Math.min(100, (litros / CAPACIDADE) * 100));
+  function atualizarTanque(numero, nivelPct) {
+    const pct = Math.max(0, Math.min(100, nivelPct));
+    const m3 = (pct / 100) * CAPACIDADE_M3;
     document.getElementById('fluid' + numero).style.height = pct + '%';
-    document.getElementById('valor' + numero).textContent = fmt(litros);
+    document.getElementById('valor' + numero).textContent = fmt(m3);
   }
 
   function atualizarEstadoBomba(numero, ligada) {
